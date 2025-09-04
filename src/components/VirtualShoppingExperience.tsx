@@ -15,6 +15,7 @@ import { ProductGallery } from './ProductGallery';
 import { ProductDetailModal } from './ProductDetailModal';
 import { ShoppingFilters } from './ShoppingFilters';
 import { ExperienceHeader } from './ExperienceHeader';
+import { VirtualTryOn } from './VirtualTryOn';
 
 export function VirtualShoppingExperience() {
   // System instance
@@ -28,6 +29,7 @@ export function VirtualShoppingExperience() {
   const [products, setProducts] = useState<readonly Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isVirtualTryOnOpen, setIsVirtualTryOnOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -151,12 +153,19 @@ export function VirtualShoppingExperience() {
       const success = await system.startVirtualTryOn(sessionId, productId);
       
       if (success) {
+        // Get the product details
+        const product = await system.getSessionState(sessionId);
+        if (product?.currentProduct) {
+          setSelectedProduct(product.currentProduct);
+        }
+        
+        // Close detail modal and open AR experience
+        setIsDetailModalOpen(false);
+        setIsVirtualTryOnOpen(true);
+        
         // Update experience state
         const updatedState = await system.getSessionState(sessionId);
         setExperienceState(updatedState);
-        
-        // For demo purposes, show a notification
-        alert('Virtual try-on experience started! 🕶️✨');
       }
     } catch (error) {
       console.error('Failed to start virtual try-on:', error);
@@ -212,6 +221,7 @@ export function VirtualShoppingExperience() {
             products={products}
             onProductClick={handleProductClick}
             onProductLike={handleProductLike}
+            onVirtualTryOn={handleVirtualTryOn}
             likedProducts={experienceState?.favorites || []}
           />
         ) : (
@@ -237,6 +247,15 @@ export function VirtualShoppingExperience() {
         onVirtualTryOn={handleVirtualTryOn}
         isLiked={selectedProduct ? (experienceState?.favorites || []).includes(selectedProduct.id) : false}
       />
+
+      {/* Virtual Try-On Modal */}
+      {selectedProduct && (
+        <VirtualTryOn
+          product={selectedProduct}
+          isOpen={isVirtualTryOnOpen}
+          onClose={() => setIsVirtualTryOnOpen(false)}
+        />
+      )}
     </div>
   );
 }

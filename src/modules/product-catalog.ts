@@ -19,9 +19,9 @@ const SAMPLE_PRODUCTS: Product[] = [
     price: 450,
     currency: 'USD',
     images: [
-      '/api/placeholder/400/600',
-      '/api/placeholder/400/600?variant=back',
-      '/api/placeholder/400/600?variant=detail'
+      'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&h=600&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1566479179817-c0c5ce4e3c76?w=400&h=600&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1594643084904-9c9b6bb2f0f7?w=400&h=600&fit=crop&crop=center'
     ],
     description: 'A flowing silk dress that captures light beautifully. Perfect for evening events or sophisticated daywear.',
     tags: ['silk', 'dress', 'evening', 'luxury', 'sustainable'],
@@ -40,8 +40,8 @@ const SAMPLE_PRODUCTS: Product[] = [
     price: 680,
     currency: 'USD',
     images: [
-      '/api/placeholder/400/600',
-      '/api/placeholder/400/600?variant=styled'
+      'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&h=600&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=400&h=600&fit=crop&crop=center'
     ],
     description: 'Sharp, structured blazer with innovative cut lines. Redefines power dressing for the modern professional.',
     tags: ['blazer', 'structured', 'professional', 'innovative'],
@@ -60,8 +60,8 @@ const SAMPLE_PRODUCTS: Product[] = [
     price: 320,
     currency: 'USD',
     images: [
-      '/api/placeholder/300/400',
-      '/api/placeholder/300/400?variant=interior'
+      'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=400&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300&h=400&fit=crop&crop=center'
     ],
     description: 'Clean lines meet functionality. This bag embodies the philosophy that luxury lies in simplicity.',
     tags: ['leather', 'minimalist', 'handbag', 'versatile'],
@@ -80,8 +80,8 @@ const SAMPLE_PRODUCTS: Product[] = [
     price: 520,
     currency: 'USD',
     images: [
-      '/api/placeholder/300/400',
-      '/api/placeholder/300/400?variant=side'
+      'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=300&h=400&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=400&fit=crop&crop=center'
     ],
     description: 'Heels that blur the line between fashion and art. Each step is a statement of creative confidence.',
     tags: ['heels', 'sculptural', 'art', 'statement'],

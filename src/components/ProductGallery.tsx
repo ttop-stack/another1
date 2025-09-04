@@ -15,6 +15,7 @@ interface ProductGalleryProps {
   products: readonly Product[];
   onProductClick: (product: Product) => void;
   onProductLike: (productId: string) => void;
+  onVirtualTryOn?: (productId: string) => void;
   likedProducts: readonly string[];
   className?: string;
 }
@@ -23,6 +24,7 @@ export function ProductGallery({
   products, 
   onProductClick, 
   onProductLike, 
+  onVirtualTryOn,
   likedProducts,
   className = ''
 }: ProductGalleryProps) {
@@ -40,6 +42,7 @@ export function ProductGallery({
           onMouseLeave={() => setHoveredProduct(null)}
           onClick={() => onProductClick(product)}
           onLike={() => onProductLike(product.id)}
+          onVirtualTryOn={onVirtualTryOn ? () => onVirtualTryOn(product.id) : undefined}
         />
       ))}
     </div>
@@ -54,6 +57,7 @@ interface ProductCardProps {
   onMouseLeave: () => void;
   onClick: () => void;
   onLike: () => void;
+  onVirtualTryOn?: () => void;
 }
 
 function ProductCard({ 
@@ -63,7 +67,8 @@ function ProductCard({
   onMouseEnter, 
   onMouseLeave, 
   onClick, 
-  onLike 
+  onLike,
+  onVirtualTryOn
 }: ProductCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -102,13 +107,20 @@ function ProductCard({
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-4">
         {/* Main Product Image */}
         <Image
-          src={product.images[currentImageIndex] || '/api/placeholder/400/600'}
+          src={product.images[currentImageIndex] || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop&crop=center'}
           alt={product.name}
           fill
           className={`object-cover transition-opacity duration-300 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={handleImageLoad}
+          onError={() => {
+            // Fallback to a default fashion image
+            const img = document.querySelector(`img[alt="${product.name}"]`) as HTMLImageElement;
+            if (img) {
+              img.src = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop&crop=center';
+            }
+          }}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
         />
         
@@ -146,13 +158,19 @@ function ProductCard({
         </div>
 
         {/* Virtual Try-On Badge */}
-        {(product.category === 'shoes' || product.category === 'accessories') && (
+        {(product.category === 'shoes' || product.category === 'accessories') && onVirtualTryOn && (
           <div className={`absolute bottom-4 left-4 transition-opacity duration-200 ${
             isHovered ? 'opacity-100' : 'opacity-0'
           }`}>
-            <span className="px-3 py-1 text-xs font-medium text-white bg-black/80 rounded-full backdrop-blur-sm">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onVirtualTryOn();
+              }}
+              className="px-3 py-1 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-full backdrop-blur-sm transition-colors"
+            >
               Try AR
-            </span>
+            </button>
           </div>
         )}
 
