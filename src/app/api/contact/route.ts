@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // Insert into D1 database
     const result = await env.DB.prepare(
-      'INSERT INTO contacts (name, email, comment) VALUES (?, ?, ?)'
+      'INSERT INTO contact_us (name, email, comment) VALUES (?, ?, ?)'
     ).bind(name, email, comment).run();
 
     if (result.success) {
