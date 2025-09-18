@@ -1,0 +1,16 @@
+name = "another1"
+compatibility_date = "2024-01-01"
+
+# D1 Database configuration
+[[d1_databases]]
+binding = "DB"
+database_name = "contact_db"
+database_id = "526e1010-cbde-472c-9712-a29913adddf8"
+
+# Environment variables for production
+[env.production]
+vars = { NODE_ENV = "production" }
+
+# Local development configuration
+[env.local]
+vars = { NODE_ENV = "development" }
