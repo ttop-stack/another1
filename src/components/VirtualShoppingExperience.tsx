@@ -16,6 +16,7 @@ import { ProductDetailModal } from './ProductDetailModal';
 import { ShoppingFilters } from './ShoppingFilters';
 import { ExperienceHeader } from './ExperienceHeader';
 import { VirtualTryOn } from './VirtualTryOn';
+import ContactUsModal from './ContactUsModal';
 
 export function VirtualShoppingExperience() {
   // System instance
@@ -32,6 +33,7 @@ export function VirtualShoppingExperience() {
   const [isVirtualTryOnOpen, setIsVirtualTryOnOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('all');
 
   // Initialize session
@@ -199,6 +201,15 @@ export function VirtualShoppingExperience() {
         onSearch={handleSearch}
         searchQuery={searchQuery}
       />
+      {/* Contact Us Button */}
+      <div className="fixed bottom-8 right-8 z-50">
+        <button
+          className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition"
+          onClick={() => setIsContactModalOpen(true)}
+        >
+          Contact Us
+        </button>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -256,6 +267,8 @@ export function VirtualShoppingExperience() {
           onClose={() => setIsVirtualTryOnOpen(false)}
         />
       )}
-    </div>
-  );
-}
+        {/* Contact Us Modal */}
+        <ContactUsModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
+      </div>
+    );
+  }
