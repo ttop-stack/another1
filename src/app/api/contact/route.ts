@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// This will be available when deployed to Cloudflare Pages
-interface Env {
-  DB: D1Database;
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, comment } = await request.json();
+    const body = await request.json();
+    const { name, email, comment } = body as { name: string; email: string; comment: string };
 
     // Validate input
     if (!name || !email || !comment) {
@@ -26,30 +22,64 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the D1 database binding (available in Cloudflare Pages)
-    const env = process.env as unknown as Env;
+    // Discord webhook URL - should be set as environment variable
+    const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
     
-    if (!env.DB) {
-      // For local development, return success without storing
-      console.log('Local development - Contact form submission:', { name, email, comment });
+    if (!discordWebhookUrl) {
+      console.log('Discord webhook not configured - Contact form submission:', { name, email, comment });
       return NextResponse.json(
-        { message: 'Contact form submitted successfully (local dev)' },
+        { message: 'Contact form submitted successfully (webhook not configured)' },
         { status: 200 }
       );
     }
 
-    // Insert into D1 database
-    const result = await env.DB.prepare(
-      'INSERT INTO contact_us (name, email, comment) VALUES (?, ?, ?)'
-    ).bind(name, email, comment).run();
+    // Create Discord embed message
+    const discordPayload = {
+      embeds: [
+        {
+          title: '📧 New Contact Form Submission',
+          color: 0x5865F2, // Discord blue color
+          fields: [
+            {
+              name: '👤 Name',
+              value: name,
+              inline: true
+            },
+            {
+              name: '📧 Email',
+              value: email,
+              inline: true
+            },
+            {
+              name: '💬 Message',
+              value: comment,
+              inline: false
+            }
+          ],
+          timestamp: new Date().toISOString(),
+          footer: {
+            text: 'Contact Form Submission'
+          }
+        }
+      ]
+    };
 
-    if (result.success) {
+    // Send to Discord webhook
+    const discordResponse = await fetch(discordWebhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(discordPayload),
+    });
+
+    if (discordResponse.ok) {
       return NextResponse.json(
         { message: 'Contact form submitted successfully' },
         { status: 200 }
       );
     } else {
-      throw new Error('Database insertion failed');
+      throw new Error(`Discord webhook failed: ${discordResponse.statusText}`);
     }
 
   } catch (error) {
