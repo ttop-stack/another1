@@ -1,9 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Simple in-memory rate limiting (for basic protection)
+const submissions = new Map<string, number[]>();
+
+// Rate limiting function
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxAttempts = 3; // 3 submissions per 15 minutes
+
+  if (!submissions.has(ip)) {
+    submissions.set(ip, []);
+  }
+
+  const userSubmissions = submissions.get(ip)!;
+  // Remove old submissions outside the window
+  const recentSubmissions = userSubmissions.filter(time => now - time < windowMs);
+  submissions.set(ip, recentSubmissions);
+
+  if (recentSubmissions.length >= maxAttempts) {
+    return true; // Rate limited
+  }
+
+  // Add current submission
+  recentSubmissions.push(now);
+  submissions.set(ip, recentSubmissions);
+  return false;
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Get client IP for rate limiting
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
+    
+    // Check rate limiting
+    if (isRateLimited(ip)) {
+      return NextResponse.json(
+        { error: 'Too many submissions. Please wait 15 minutes before trying again.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
-    const { name, email, comment } = body as { name: string; email: string; comment: string };
+    const { name, email, comment } = body as { 
+      name: string; 
+      email: string; 
+      comment: string; 
+    };
 
     // Validate input
     if (!name || !email || !comment) {
@@ -11,6 +55,26 @@ export async function POST(request: NextRequest) {
         { error: 'Name, email, and comment are required' },
         { status: 400 }
       );
+    }
+
+    // Verify Turnstile token if configured
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    if (turnstileSecret && turnstileToken) {
+      const turnstileResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `secret=${turnstileSecret}&response=${turnstileToken}&remoteip=${ip}`,
+      });
+
+      const turnstileResult = await turnstileResponse.json() as { success: boolean };
+      if (!turnstileResult.success) {
+        return NextResponse.json(
+          { error: 'Security verification failed. Please try again.' },
+          { status: 400 }
+        );
+      }
     }
 
     // Email validation

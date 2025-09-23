@@ -9,6 +9,7 @@ const ContactUsModal: React.FC<ContactUsModalProps> = ({ isOpen, onClose }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState("");
+  const [honeypot, setHoneypot] = useState(""); // Bot trap field
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
 
@@ -16,6 +17,13 @@ const ContactUsModal: React.FC<ContactUsModalProps> = ({ isOpen, onClose }) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitMessage("");
+
+    // Honeypot check - if filled, it's likely a bot
+    if (honeypot) {
+      setSubmitMessage("Submission blocked. Please try again.");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/contact', {
